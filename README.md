@@ -1,70 +1,76 @@
-URLShortener is a Spring Boot based URL Shortening service
-The service runs a Spring Boot Application and exposes the following endpoints
+# URLShortener
 
-- /shorten -> accepts a post request containing a long url and generates a short url
-  
-  Sample curl request
-  
-  curl -H "Content-Type: application/json" -X POST -d '{"longUrl":"https://www.microsoft.com/en-ca/microsoft-teams/download-app#download-for-desktop1"}' http://mic.shrt:4000/shorten
+A URLShortener SpringBoot application
 
-  Sample curl response
-  
-  {"shortURL":"http://mic.shrt:4000/7GOdGY0nq","message":"SUCCESS"}
-  
-- Once you get a short URL and if you open the short URL in a browser, the service would re-direct the user to the actual long url
+## Available Scripts
 
-- The service creates short urls with hostname as mic.shrt. Add an entry in /etc/hosts as
-- 
-  127.0.0.1 mic.shrt
-  
-- How to build and execute the sources
+In the project directory, you can run:
 
-  Checkout the sources using git clone -b develop https://github.com/dhruvbiswas/urlshortener.git
+### `mvn clean package`
 
-  Build the sources by running
-  
-  mvn clean package
+Builds the app in the development mode.
 
-  Build Spring Boot runtime container by running
-  
-  ./build_url_shortener_runtime_container.sh
+### `./build_url_shortener_runtime_container.sh`
 
-  Change the mongodb volume mounts in the file docker-compose.yml to a path that is available on your machine
-  
-  Change lines in the file that begin with /Users/databackup/ and change it to, lets say, /tmp/mongo/
-  
-  Keep the rest of the path the same.
-  
-  So you should have lines similar to (make sure /tmp/mongo/mongodb_data_volume/db and /tmp/mongo/mongodb_data_volume/log path exists)
-  
-  /tmp/mongo/mongodb_data_volume/db:/data/db
-  
-  /tmp/mongo/mongodb_data_volume/log:/var/log/mongodb
-  
-  Start set of services by running
-  
-  ./runcompose.sh
+Creates Spring Boot runtime container
 
-  Wait for all containers to start
-  
-  docker container ls
+```REPOSITORY             TAG               IMAGE ID       CREATED         SIZE ```\
+```urlshortener.service   latest            0799d971ae1c   5 seconds ago   515MB```
 
-  CONTAINER ID   IMAGE                         COMMAND                  CREATED          STATUS          PORTS                                               NAMES
-  
-126ff0e4f43c   nginx:latest                  "/docker-entrypoint.…"   7 seconds ago    Up 2 seconds    80/tcp, 0.0.0.0:4000->4000/tcp, :::4000->4000/tcp   nginx
-  
-25927e529a20   urlshortener.service:latest   "java -jar /urlshort…"   11 seconds ago   Up 6 seconds    8080/tcp                                            urlshortener_urlshortener_2
+### `Modify mongo db path`
 
-e5c0199b840c   urlshortener.service:latest   "java -jar /urlshort…"   11 seconds ago   Up 6 seconds    8080/tcp                                            urlshortener_urlshortener_1
+Using a text editor edit the file docker-compose.yml and modify the following lines.\
 
-f93e7ac54241   mongo:latest                  "docker-entrypoint.s…"   14 seconds ago   Up 10 seconds   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp       mongodb
+/Users/databackup/mongodb_data_volume/db:/data/db \
+to \
+/tmp/databackup/mongo_data_volume/db:/data/db
 
-  Open 2 separate terminals and Check that Spring Boot containers started successfully
-  
-  docker logs --follow 25927e529a20 -> this is the container_id of urlshortener.service:latest
-  
-  docker logs --follow e5c0199b840c -> this is the container_id of urlshortener.service:latest
+/Users/databackup/mongodb_data_volume/log:/var/log/mongodb \
+to \
+/tmp/databackup/mongodb_data_volume/log:/var/log/mongodb
 
-  Docker logs should show that Spring Boot started and each container connected to MongoDB
+Next create these directories on your local machine
 
-  Send curl requests as shown above to create short urls and to visit short urls created by the service.
+mkdir -p /tmp/databackup/mongodb_data_volume/log \
+mkdir -p /tmp/databackup/mongo_data_volume/db
+
+This will ensure that mongodb data is maintained across container restarts
+
+### `./runcompose.sh`
+
+**Note: this would start containers on your machine!**
+
+### `Check what containers get spawned by running docker container ls
+
+Check 2 Spring Boot containers, nginx container and mongodb containers have started
+
+Check the container ids from the above command output and then view its logs by running \
+the following
+
+docker logs --follow <container_id>
+
+Open 2 separate terminals and check each Spring Boot container's logs \
+Logs should indicate the server started correctly and also should indicate that mongodb \
+connection was successfully established
+
+### Shortening a URL
+
+curl -H "Content-Type: application/json" -X POST -d \
+'{"longUrl":"https://www.microsoft.com/en-ca/microsoft-teams/download-app#download-for-desktop1"}' \
+http://mic.shrt:4000/shorten
+
+This curl request should hit the nginx proxy first and then should hit one of the \
+load balanced Spring Boot servers. \
+The Server should generate a short URL and send the following response to curl
+
+{"shortURL":"http://mic.shrt:4000/7GOdGY0nq","message":"SUCCESS"}
+
+### Open a browser and visit the short URL 
+
+The browser should open a connection to nginx and then the short url request \
+should reach one of the Spring Boot load balanced servers. \
+If the long URL for this short URL is not cached in the server then a mongoDB \
+request would be sent to fetch the long url. \
+The fetched url would be cached in the server and a redirect response would be sent to the \
+browser. \
+The browser should get re-directed to the actual long url.
