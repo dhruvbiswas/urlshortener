@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+  mongodb:
+    container_name: mongodb
+    hostname: mongodb
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - /Users/databackup/mongodb_data_volume/db:/data/db
+      - /Users/databackup/mongodb_data_volume/log:/var/log/mongodb
+      - ./init.d:/docker-entrypoint-initdb.d
+
+  urlshortener:
+    image: urlshortener.service:latest
+    links:
+      - mongodb
+    depends_on:
+      - mongodb
+    expose:
+      - "8080"
+
+  nginx:
+    hostname: nginx
+    container_name: nginx
+    image: nginx:latest
+    depends_on:
+      - urlshortener
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "4000:4000"
+
+volumes:
+  mongodb-data:
