@@ -2,9 +2,7 @@ package com.microsoft.url.shortener.enums;
 
 import com.microsoft.url.shortener.constants.Constants;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public enum BaseConvertorEnum {
@@ -44,7 +42,6 @@ public enum BaseConvertorEnum {
         int base = this.charset.length();
 
         long result = 0L;
-        int length = number.length();
 
         for (int i = number.length() - 1, power = 0; i >= 0; i--, power++) {
             // Start at the last element and raise the co-efficient by the power at index i
