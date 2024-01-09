@@ -19,9 +19,11 @@ The service runs a Spring Boot Application and exposes the following endpoints
   Checkout the sources using git clone -b develop https://github.com/dhruvbiswas/urlshortener.git
 
   Build the sources by running
+  
   mvn clean package
 
   Build Spring Boot runtime container by running
+  
   ./build_url_shortener_runtime_container.sh
 
   Change the mongodb volume mounts in the file docker-compose.yml to a path that is available on your machine
