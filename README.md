@@ -2,6 +2,9 @@
 
 A URLShortener SpringBoot application
 
+The package name in the src contains com.microsoft as this workspace was a take home task for a
+microsoft interview.
+
 ## Available Scripts
 
 In the project directory, you can run:
