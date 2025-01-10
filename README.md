@@ -2,8 +2,7 @@
 
 A URLShortener SpringBoot application
 
-The package name in the src contains com.microsoft as this workspace was a take home task for a
-microsoft interview.
+The package name in the src contains com.microsoft as this was an example task in one of microsoft azure courses.
 
 ## Available Scripts
 
